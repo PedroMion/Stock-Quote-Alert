@@ -3,6 +3,7 @@ namespace StockQuote.Enums
     public enum MessageTypeEnum
     {
         Sale,
-        Purchase
+        Purchase,
+        None
     }
 }

@@ -26,8 +26,8 @@ namespace StockQuote
 
             string symbol = args[0];
 
-            if (!decimal.TryParse(args[1], CultureInfo.InvariantCulture, out var buyPrice) ||
-                !decimal.TryParse(args[2], CultureInfo.InvariantCulture, out var sellPrice))
+            if (!decimal.TryParse(args[1], CultureInfo.InvariantCulture, out var sellPrice) ||
+                !decimal.TryParse(args[2], CultureInfo.InvariantCulture, out var buyPrice))
             {
                 Console.WriteLine("Os valores monetários fornecidos devem ser números decimais válidos, com ponto como separador.");
                 return;
@@ -53,21 +53,20 @@ namespace StockQuote
 
                     services.AddScoped<IStockApiService, StockApiService>();
                     services.AddScoped<IMailService, MailService>();
+                    services.AddScoped<IQuoteMonitorService, QuoteMonitorService>();
                 })
                 .Build();
 
             using var scope = host.Services.CreateScope();
-            var mailService = scope.ServiceProvider.GetRequiredService<IMailService>();
+            var monitorService = scope.ServiceProvider.GetRequiredService<IQuoteMonitorService>();
 
             try
             {
-                await mailService.SendEmailToRecipientFromTypeAsync(MessageTypeEnum.Purchase);
-
-                Console.WriteLine($"Email enviado com sucesso, confira a caixa de entrada!");
+                await monitorService.CheckStockQuoteAndSendEmailAsync(alertParams);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao enviar email: {ex.Message}");
+                Console.WriteLine($"Erro ao monitorar ativo: {ex.Message}");
             }
         }
     }
