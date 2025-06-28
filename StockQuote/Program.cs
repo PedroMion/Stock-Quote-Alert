@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StockQuote.Configuration;
 using StockQuote.Data.Dto;
+using StockQuote.Enums;
 using StockQuote.Services;
 using StockQuote.Services.Interfaces;
 
@@ -48,24 +49,25 @@ namespace StockQuote
                 .ConfigureServices((context, services) =>
                 {
                     services.Configure<StockApiConfiguration>(context.Configuration.GetSection("StockApi"));
+                    services.Configure<MailConfiguration>(context.Configuration.GetSection("MailConfiguration"));
 
                     services.AddScoped<IStockApiService, StockApiService>();
+                    services.AddScoped<IMailService, MailService>();
                 })
                 .Build();
 
             using var scope = host.Services.CreateScope();
-            var stockApiService = scope.ServiceProvider.GetRequiredService<IStockApiService>();
+            var mailService = scope.ServiceProvider.GetRequiredService<IMailService>();
 
             try
             {
-                var response = await stockApiService.GetStockInformationFromStockCodeAsync(alertParams.StockCode);
+                await mailService.SendEmailToRecipientFromTypeAsync(MessageTypeEnum.Purchase);
 
-                Console.WriteLine($"Símbolo: {response.StockCode}");
-                Console.WriteLine($"Preço  : {response.StockPrice}");
+                Console.WriteLine($"Email enviado com sucesso, confira a caixa de entrada!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao consultar {alertParams.StockCode}: {ex.Message}");
+                Console.WriteLine($"Erro ao enviar email: {ex.Message}");
             }
         }
     }
