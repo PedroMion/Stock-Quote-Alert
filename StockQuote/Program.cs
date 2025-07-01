@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using StockQuote.Configuration;
 using StockQuote.Data.Dto;
 using StockQuote.Enums;
@@ -13,7 +14,7 @@ namespace StockQuote
 
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length != 3)
             {
@@ -33,7 +34,7 @@ namespace StockQuote
                 return;
             }
 
-            var alertParams = new AlertParametersDto()
+            var alertParameters = new AlertParametersDto()
             {
                 StockCode = symbol,
                 BuyPrice = buyPrice,
@@ -54,20 +55,13 @@ namespace StockQuote
                     services.AddScoped<IStockApiService, StockApiService>();
                     services.AddScoped<IMailService, MailService>();
                     services.AddScoped<IQuoteMonitorService, QuoteMonitorService>();
+                    services.AddSingleton(alertParameters);
+
+                    services.AddHostedService<QuoteMonitorWorker>();
                 })
                 .Build();
 
-            using var scope = host.Services.CreateScope();
-            var monitorService = scope.ServiceProvider.GetRequiredService<IQuoteMonitorService>();
-
-            try
-            {
-                await monitorService.CheckStockQuoteAndSendEmailAsync(alertParams);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro ao monitorar ativo: {ex.Message}");
-            }
+            host.Run();
         }
     }
 }
