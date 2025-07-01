@@ -33,7 +33,7 @@ namespace StockQuote.Services
 
                 if (typeOfEmail != MessageTypeEnum.None)
                 {
-                    await _mailService.SendEmailToRecipientFromTypeAsync(typeOfEmail);
+                    await _mailService.SendEmailToRecipientFromTypeAndStockInformationAsync(typeOfEmail, stockInfo.StockPrice, parameters);
                 }
             }
         }
