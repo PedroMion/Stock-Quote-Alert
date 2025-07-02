@@ -1,15 +1,16 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StockQuote.Data.Dto;
+using StockQuote.Helpers;
 using StockQuote.Services.Interfaces;
 
 public class QuoteMonitorWorker(
-    ILogger<QuoteMonitorWorker> logger,
+    ILoggerService loggerService,
     IQuoteMonitorService monitorService,
     AlertParametersDto alertParameters
 ) : BackgroundService
 {
-    private readonly ILogger<QuoteMonitorWorker> _logger = logger;
+    private readonly ILoggerService _loggerService = loggerService;
     private readonly IQuoteMonitorService _monitorService = monitorService;
     private readonly AlertParametersDto _alertParameters = alertParameters;
 
@@ -25,10 +26,12 @@ public class QuoteMonitorWorker(
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao monitorar ativo: {Asset}", _alertParameters.StockCode);
+                _loggerService.LogError(ex, "Erro ao monitorar ativo: {Asset}. Por favor, entre em contato com o responsável pelo software.", _alertParameters.StockCode);
+
+                EnvironmentHelper.TerminateProgramExecution();
             }
 
-            _logger.LogInformation("Verificação completa");
+            _loggerService.LogInformation("Verificação completa");
             await Task.Delay(delayBetweenChecks, stoppingToken);
         }
     }

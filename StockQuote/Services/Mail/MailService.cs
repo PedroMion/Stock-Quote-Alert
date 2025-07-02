@@ -11,10 +11,10 @@ using StockQuote.Services.Interfaces;
 
 namespace StockQuote.Services
 {
-    public class MailService(IOptions<MailConfiguration> options, ILogger<IMailService> logger) : IMailService
+    public class MailService(IOptions<MailConfiguration> options, ILoggerService loggerService) : IMailService
     {
         private readonly MailConfiguration _config = options.Value;
-        private readonly ILogger<IMailService> _logger = logger;
+        private readonly ILoggerService _loggerService = loggerService;
 
         private SmtpClient GetSmtpClientFromConfiguration()
         {
@@ -29,7 +29,9 @@ namespace StockQuote.Services
         {
             if (messageType == MessageTypeEnum.None)
             {
-                _logger.LogError("Envio de email indevido.");
+                _loggerService.LogError(null, "Envio de email indevido. Por favor, entre em contato com o responsável pelo Software.");
+
+                EnvironmentHelper.TerminateProgramExecution();
             }
 
             message.Subject = EmailHelper.GetEmailSubjectFromTypeAndStockInformation(messageType, parameters);
@@ -61,7 +63,16 @@ namespace StockQuote.Services
 
             MailMessage message = GetEmailMessageFromTypeAndStockInformation(messageType, receivedStockQuote, parameters);
 
-            await smtpClient.SendMailAsync(message);
+            try
+            {
+                await smtpClient.SendMailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                _loggerService.LogError(ex, "Erro ao enviar email de {senderEmail} para {recipientEmail}. Por favor, verifique os dados fornecidos. Caso o problema persista, entre em contato com o responsável pelo Software.", _config.SenderEmail, _config.RecipientEmail);
+
+                EnvironmentHelper.TerminateProgramExecution();
+            }
         }
     }
 }

@@ -46,15 +46,18 @@ namespace StockQuote
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    config.AddJsonFile("appsettings.User.json", optional: true, reloadOnChange: true);
                 })
                 .ConfigureServices((context, services) =>
                 {
                     services.Configure<StockApiConfiguration>(context.Configuration.GetSection("StockApi"));
                     services.Configure<MailConfiguration>(context.Configuration.GetSection("MailConfiguration"));
+                    services.Configure<GeneralConfiguration>(context.Configuration.GetSection("General"));
 
                     services.AddScoped<IStockApiService, StockApiService>();
                     services.AddScoped<IMailService, MailService>();
                     services.AddScoped<IQuoteMonitorService, QuoteMonitorService>();
+                    services.AddScoped<ILoggerService, LoggerService>();
                     services.AddSingleton(alertParameters);
 
                     services.AddHostedService<QuoteMonitorWorker>();
