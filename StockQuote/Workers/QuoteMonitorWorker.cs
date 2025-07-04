@@ -8,12 +8,14 @@ using StockQuote.Services.Interfaces;
 public class QuoteMonitorWorker(
     ILoggerService loggerService,
     IQuoteMonitorService monitorService,
-    AlertParametersDto alertParameters
+    AlertParametersDto alertParameters,
+    IEnvironmentService environmentService
 ) : BackgroundService
 {
     private readonly ILoggerService _loggerService = loggerService;
     private readonly IQuoteMonitorService _monitorService = monitorService;
     private readonly AlertParametersDto _alertParameters = alertParameters;
+    private readonly IEnvironmentService _environmentService = environmentService;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -29,7 +31,7 @@ public class QuoteMonitorWorker(
             {
                 _loggerService.LogError(ex, LogConstants.AssetMonitoringError, _alertParameters.StockCode);
 
-                EnvironmentHelper.TerminateProgramExecution();
+                _environmentService.TerminateProgramExecution();
             }
 
             _loggerService.LogInformation(LogConstants.AssetMonitoringCompleted, _alertParameters.StockCode);

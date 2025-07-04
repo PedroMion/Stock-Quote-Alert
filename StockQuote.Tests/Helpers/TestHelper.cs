@@ -4,9 +4,9 @@ namespace StockQuote.Tests.Helpers
 {
     public static class TestHelper
     {
-        public static T LoadObject<T>(string path)
+        public static T GetMockObjectFromNameAndClass<T>(string testClass, string fileName)
         {
-            var fullPath = Path.Combine(AppContext.BaseDirectory, "UnitTests", "MockData", path);
+            var fullPath = Path.Combine(AppContext.BaseDirectory, "UnitTests", "MockData", testClass, fileName);
 
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"Arquivo de mock não encontrado: {fullPath}");

@@ -1,7 +1,5 @@
-using System.Net;
 using System.Net.Mail;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StockQuote.Configuration;
 using StockQuote.Constants;
@@ -12,19 +10,17 @@ using StockQuote.Services.Interfaces;
 
 namespace StockQuote.Services
 {
-    public class MailService(IOptions<MailConfiguration> options, ILoggerService loggerService) : IMailService
+    public class MailService(
+        IOptions<MailConfiguration> options,
+        ILoggerService loggerService,
+        ISmtpClientService smtpClientService,
+        IEnvironmentService environmentService
+    ) : IMailService
     {
         private readonly MailConfiguration _config = options.Value;
         private readonly ILoggerService _loggerService = loggerService;
-
-        private SmtpClient GetSmtpClientFromConfiguration()
-        {
-            return new SmtpClient(_config.SmtpServer, _config.Port)
-            {
-                Credentials = new NetworkCredential(_config.SenderEmail, _config.SenderPassword),
-                EnableSsl = true
-            };
-        }
+        private readonly ISmtpClientService _smtpClientService = smtpClientService;
+        private readonly IEnvironmentService _environmentService = environmentService;
 
         private void UseTypeAndStockInformationToSetEmailSubjectAndBody(ref MailMessage message, MessageTypeEnum messageType, decimal receivedStockQuote, AlertParametersDto parameters)
         {
@@ -32,7 +28,7 @@ namespace StockQuote.Services
             {
                 _loggerService.LogError(null, LogConstants.ImproperEmailSending);
 
-                EnvironmentHelper.TerminateProgramExecution();
+                _environmentService.TerminateProgramExecution();
             }
 
             message.Subject = EmailHelper.GetEmailSubjectFromTypeAndStockInformation(messageType, parameters);
@@ -60,19 +56,17 @@ namespace StockQuote.Services
 
         public async Task SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum messageType, decimal receivedStockQuote, AlertParametersDto parameters)
         {
-            SmtpClient smtpClient = GetSmtpClientFromConfiguration();
-
-            MailMessage message = GetEmailMessageFromTypeAndStockInformation(messageType, receivedStockQuote, parameters);
-
             try
             {
-                await smtpClient.SendMailAsync(message);
+                MailMessage message = GetEmailMessageFromTypeAndStockInformation(messageType, receivedStockQuote, parameters);
+
+                await _smtpClientService.SendMailAsync(message);
             }
             catch (Exception ex)
             {
                 _loggerService.LogError(ex, LogConstants.FailedToSendEmail, _config.SenderEmail, _config.RecipientEmail);
 
-                EnvironmentHelper.TerminateProgramExecution();
+                _environmentService.TerminateProgramExecution();
             }
         }
     }
