@@ -13,7 +13,7 @@ namespace StockQuote.Helpers
             else return "acima do valor de venda";
         }
 
-        private static string GetTresholdValueFromParametersBasedOnType(MessageTypeEnum type, AlertParametersDto parameters)
+        private static string GetThresholdValueFromParametersBasedOnType(MessageTypeEnum type, AlertParametersDto parameters)
         {
             if (type == MessageTypeEnum.Purchase)
             {
@@ -36,7 +36,7 @@ namespace StockQuote.Helpers
             return EmailConstants.BODY.Replace(EmailConstants.STOCK_CODE_PLACEHOLDER, parameters.StockCode)
                 .Replace(EmailConstants.DATE_TIME_PLACEHOLDER, DateTime.Now.ToString(new CultureInfo("pt-BR")))
                 .Replace(EmailConstants.EMAIL_TYPE_PLACEHOLDER, GetSpecificMailMessage(emailType))
-                .Replace(EmailConstants.TRESHOLD_VALUE_PLACEHOLDER, GetTresholdValueFromParametersBasedOnType(emailType, parameters))
+                .Replace(EmailConstants.THRESHOLD_VALUE_PLACEHOLDER, GetThresholdValueFromParametersBasedOnType(emailType, parameters))
                 .Replace(EmailConstants.STOCK_VALUE_PLACEHOLDER, stockValue.ToString("N2"));
         }
     }

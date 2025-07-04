@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StockQuote.Configuration;
+using StockQuote.Constants;
 using StockQuote.Data.Dto;
 using StockQuote.Enums;
 using StockQuote.Helpers;
@@ -29,7 +30,7 @@ namespace StockQuote.Services
         {
             if (messageType == MessageTypeEnum.None)
             {
-                _loggerService.LogError(null, "Envio de email indevido. Por favor, entre em contato com o responsável pelo Software.");
+                _loggerService.LogError(null, LogConstants.ImproperEmailSending);
 
                 EnvironmentHelper.TerminateProgramExecution();
             }
@@ -69,7 +70,7 @@ namespace StockQuote.Services
             }
             catch (Exception ex)
             {
-                _loggerService.LogError(ex, "Erro ao enviar email de {senderEmail} para {recipientEmail}. Por favor, verifique os dados fornecidos. Caso o problema persista, entre em contato com o responsável pelo Software.", _config.SenderEmail, _config.RecipientEmail);
+                _loggerService.LogError(ex, LogConstants.FailedToSendEmail, _config.SenderEmail, _config.RecipientEmail);
 
                 EnvironmentHelper.TerminateProgramExecution();
             }

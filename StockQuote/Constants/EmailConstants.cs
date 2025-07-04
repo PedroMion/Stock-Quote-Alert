@@ -10,7 +10,7 @@ namespace StockQuote.Constants
 
         public const string EMAIL_TYPE_PLACEHOLDER = "{EMAIL_TYPE}";
 
-        public const string TRESHOLD_VALUE_PLACEHOLDER = "{TRESHOLD_VALUE}";
+        public const string THRESHOLD_VALUE_PLACEHOLDER = "{THRESHOLD_VALUE}";
 
         public const string SALE_SUBJECT = "[StockQuote] Alerta de venda - {STOCK_CODE}";
 
@@ -68,7 +68,7 @@ namespace StockQuote.Constants
                 <div class="content">
                     <p>Prezado(a),</p>
                     <p>O ativo <span class="highlight">{STOCK_CODE}</span> atingiu o valor de <span class="highlight">R${STOCK_VALUE}</span> em <span class="highlight">{DATE_TIME}</span>.</p>
-                    <p>O valor atestado encontra-se {EMAIL_TYPE} fornecido de <span class="highlight">R${TRESHOLD_VALUE}</span>.</p>
+                    <p>O valor atestado encontra-se {EMAIL_TYPE} fornecido de <span class="highlight">R${THRESHOLD_VALUE}</span>.</p>
                     <p>Recomenda-se avaliar a ação necessária com base em sua estratégia.</p>
                 </div>
                 <div class="footer">
