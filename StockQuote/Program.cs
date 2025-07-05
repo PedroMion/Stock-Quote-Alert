@@ -1,13 +1,9 @@
 ﻿using System.Globalization;
-using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using StockQuote.Configuration;
 using StockQuote.Data.Dto;
-using StockQuote.Enums;
-using StockQuote.External;
 using StockQuote.Services;
 using StockQuote.Services.Interfaces;
 

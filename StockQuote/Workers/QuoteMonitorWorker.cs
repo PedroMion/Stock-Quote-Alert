@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using StockQuote.Constants;
 using StockQuote.Data.Dto;
-using StockQuote.Helpers;
 using StockQuote.Services.Interfaces;
 
 public class QuoteMonitorWorker(

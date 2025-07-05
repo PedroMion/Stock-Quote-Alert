@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -18,6 +17,12 @@ namespace StockQuote.Tests.Services
         private readonly Mock<ILoggerService> _loggerMock = new();
         private readonly Mock<ISmtpClientService> _smtpMock = new();
         private readonly Mock<IEnvironmentService> _envMock = new();
+        private readonly AlertParametersDto _alertParameters = new()
+        {
+            StockCode = "PETR4",
+            BuyPrice = 22.00m,
+            SellPrice = 23.00m
+        };
 
         private void SetupMailConfigurationAndEnvironment(string mailConfigurationFileName)
         {
@@ -27,6 +32,34 @@ namespace StockQuote.Tests.Services
 
             _envMock.Setup(env => env.TerminateProgramExecution())
                     .Throws(new OperationCanceledException());
+        }
+
+        private void SetupSmtpThrowException()
+        {
+            _smtpMock.Setup(smtp =>
+                smtp.SendMailAsync(It.IsAny<MailMessage>())
+            ).ThrowsAsync(new Exception());
+        }
+
+        private async Task CallSendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum messageType, decimal stockQuote)
+        {
+            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
+
+            await service.SendEmailToRecipientFromTypeAndStockInformationAsync(messageType, stockQuote, _alertParameters);
+        }
+
+        private async Task SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum messageType, decimal stockQuote)
+        {
+            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
+
+            try
+            {
+                await service.SendEmailToRecipientFromTypeAndStockInformationAsync(messageType, stockQuote, _alertParameters);
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<OperationCanceledException>(ex);
+            }
         }
 
         private void AssertLogErrorImproperSendingCalls(Times times)
@@ -60,12 +93,9 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task MessageTypeSale_ShouldTriggerEmail()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("MailService", "AlertParamsPETR4.json");
-
             SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
 
-            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
-            await service.SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Sale, Convert.ToDecimal(23.10), alertParametersMock);
+            await CallSendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Sale, Convert.ToDecimal(23.10));
 
             AssertLogErrorFailedToSend(Times.Never());
             AssertSmtpServiceCalls(Times.Once());
@@ -75,12 +105,9 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task MessageTypePurchase_ShouldTriggerEmail()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("MailService", "AlertParamsPETR4.json");
-
             SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
 
-            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
-            await service.SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10), alertParametersMock);
+            await CallSendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10));
 
             AssertLogErrorFailedToSend(Times.Never());
             AssertSmtpServiceCalls(Times.Once());
@@ -90,20 +117,9 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task MessageTypeNone_ShouldLogError()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("MailService", "AlertParamsPETR4.json");
-
             SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
 
-            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
-
-            try
-            {
-                await service.SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.None, Convert.ToDecimal(23.10), alertParametersMock);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<OperationCanceledException>(ex);
-            }
+            await SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum.None, Convert.ToDecimal(23.10));
 
             AssertLogErrorImproperSendingCalls(Times.Once());
             AssertSmtpServiceCalls(Times.Never());
@@ -113,20 +129,9 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task InvalidEmailInformation_ShouldTriggerError()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("MailService", "AlertParamsPETR4.json");
-
             SetupMailConfigurationAndEnvironment("MailConfigurationWithouEmailInformationMock.json");
 
-            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
-
-            try
-            {
-                await service.SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10), alertParametersMock);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<OperationCanceledException>(ex);
-            }
+            await SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10));
 
             AssertLogErrorFailedToSend(Times.Once());
             AssertSmtpServiceCalls(Times.Never());
@@ -136,24 +141,11 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task WhenSmtpFails_ShouldTriggerError()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("MailService", "AlertParamsPETR4.json");
-
             SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
 
-            _smtpMock.Setup(smtp =>
-                smtp.SendMailAsync(It.IsAny<MailMessage>())
-            ).ThrowsAsync(new Exception());
+            SetupSmtpThrowException();
 
-            var service = new MailService(_optionsMock.Object, _loggerMock.Object, _smtpMock.Object, _envMock.Object);
-
-            try
-            {
-                await service.SendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10), alertParametersMock);
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<OperationCanceledException>(ex);
-            }
+            await SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10));
 
             AssertLogErrorFailedToSend(Times.Once());
             AssertSmtpServiceCalls(Times.Once());

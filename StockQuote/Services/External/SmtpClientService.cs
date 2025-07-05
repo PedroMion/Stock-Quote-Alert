@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using StockQuote.Configuration;
 using StockQuote.Services.Interfaces;
 
-namespace StockQuote.External
+namespace StockQuote.Services
 {
     public class SmtpClientService(IOptions<MailConfiguration> options): ISmtpClientService
     {

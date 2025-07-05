@@ -13,19 +13,22 @@ namespace StockQuote.Tests.Services
         private readonly Mock<ILoggerService> _loggerMock = new();
         private readonly Mock<IMailService> _mailMock = new();
         private readonly Mock<IStockApiService> _apiMock = new();
-
-        private void ConfigureStockApiResponse(StockInformationDto? response, String? symbol)
+        private readonly AlertParametersDto _alertParameters = new()
         {
-            if (symbol != null)
-            {
-                _apiMock.Setup(api => api.GetStockInformationFromStockCodeAsync(symbol))
-                        .ReturnsAsync(response);
-            }
-            else
-            {
-                _apiMock.Setup(api => api.GetStockInformationFromStockCodeAsync(It.IsAny<string>()))
-                         .ReturnsAsync(response);
-            }
+            StockCode = "PETR4",
+            BuyPrice = 22.00m,
+            SellPrice = 23.00m
+        };
+
+        private StockInformationDto GetApiResponseMockFromFileName(string fileName)
+        {
+            return TestHelper.GetMockObjectFromNameAndClass<StockInformationDto>("QuoteMonitorService", fileName);
+        }
+
+        private void ConfigureStockApiResponse(StockInformationDto? apiResponseMock)
+        {
+            _apiMock.Setup(api => api.GetStockInformationFromStockCodeAsync(_alertParameters.StockCode))
+                    .ReturnsAsync(apiResponseMock);
         }
 
         private void AssertLogWarning(Times times)
@@ -45,16 +48,20 @@ namespace StockQuote.Tests.Services
             );
         }
 
+        private async Task CallCheckStockQuoteAndSendEmailAsync()
+        {
+            var service = new QuoteMonitorService(_loggerMock.Object, _mailMock.Object, _apiMock.Object);
+
+            await service.CheckStockQuoteAndSendEmailAsync(_alertParameters);
+        }
+
         [Fact]
         public async Task PriceInRangeTest_ShouldNotTriggerEmail()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("QuoteMonitorService", "AlertParamsPETR4.json");
-            StockInformationDto apiResponseMock = TestHelper.GetMockObjectFromNameAndClass<StockInformationDto>("QuoteMonitorService", "StockApiInRangeResponsePETR4.json");
+            var apiResponseMock = GetApiResponseMockFromFileName("StockApiInRangeResponsePETR4.json");
+            ConfigureStockApiResponse(apiResponseMock);
 
-            ConfigureStockApiResponse(apiResponseMock, alertParametersMock.StockCode);
-
-            var service = new QuoteMonitorService(_loggerMock.Object, _mailMock.Object, _apiMock.Object);
-            await service.CheckStockQuoteAndSendEmailAsync(alertParametersMock);
+            await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Never());
             AssertMailMock(It.IsAny<MessageTypeEnum>(), It.IsAny<decimal>(), It.IsAny<AlertParametersDto>(), Times.Never());
@@ -63,42 +70,33 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task PriceAboveSaleThresholdTest_ShouldTriggerSaleEmail()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("QuoteMonitorService", "AlertParamsPETR4.json");
-            StockInformationDto apiResponseMock = TestHelper.GetMockObjectFromNameAndClass<StockInformationDto>("QuoteMonitorService", "StockApiAboveSellThresholdResponsePETR4.json");
+            var apiResponseMock = GetApiResponseMockFromFileName("StockApiAboveSellThresholdResponsePETR4.json");
+            ConfigureStockApiResponse(apiResponseMock);
 
-            ConfigureStockApiResponse(apiResponseMock, alertParametersMock.StockCode);
-
-            var service = new QuoteMonitorService(_loggerMock.Object, _mailMock.Object, _apiMock.Object);
-            await service.CheckStockQuoteAndSendEmailAsync(alertParametersMock);
+            await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Never());
-            AssertMailMock(MessageTypeEnum.Sale, apiResponseMock.StockPrice, alertParametersMock, Times.Once());
+            AssertMailMock(MessageTypeEnum.Sale, apiResponseMock.StockPrice, _alertParameters, Times.Once());
         }
 
         [Fact]
         public async Task PriceBelowPurchaseThresholdTest_ShouldTriggerPurchaseEmail()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("QuoteMonitorService", "AlertParamsPETR4.json");
-            StockInformationDto apiResponseMock = TestHelper.GetMockObjectFromNameAndClass<StockInformationDto>("QuoteMonitorService", "StockApiBelowPurchaseThresholdResponsePETR4.json");
+            var apiResponseMock = GetApiResponseMockFromFileName("StockApiBelowPurchaseThresholdResponsePETR4.json");
+            ConfigureStockApiResponse(apiResponseMock);
 
-            ConfigureStockApiResponse(apiResponseMock, alertParametersMock.StockCode);
-
-            var service = new QuoteMonitorService(_loggerMock.Object, _mailMock.Object, _apiMock.Object);
-            await service.CheckStockQuoteAndSendEmailAsync(alertParametersMock);
+            await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Never());
-            AssertMailMock(MessageTypeEnum.Purchase, apiResponseMock.StockPrice, alertParametersMock, Times.Once());
+            AssertMailMock(MessageTypeEnum.Purchase, apiResponseMock.StockPrice, _alertParameters, Times.Once());
         }
 
         [Fact]
         public async Task ApiResponseIsEmptyTest_ShouldLogWarning()
         {
-            AlertParametersDto alertParametersMock = TestHelper.GetMockObjectFromNameAndClass<AlertParametersDto>("QuoteMonitorService", "AlertParamsPETR4.json");
+            ConfigureStockApiResponse(null);
 
-            ConfigureStockApiResponse(null, alertParametersMock.StockCode);
-
-            var service = new QuoteMonitorService(_loggerMock.Object, _mailMock.Object, _apiMock.Object);
-            await service.CheckStockQuoteAndSendEmailAsync(alertParametersMock);
+            await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Once());
             AssertMailMock(It.IsAny<MessageTypeEnum>(), It.IsAny<decimal>(), It.IsAny<AlertParametersDto>(), Times.Never());
