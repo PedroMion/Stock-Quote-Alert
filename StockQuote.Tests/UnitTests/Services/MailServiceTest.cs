@@ -59,12 +59,12 @@ namespace StockQuote.Tests.Services
 
         private void AssertLogErrorImproperSendingCalls(Times times)
         {
-            _loggerMock.Verify(l => l.LogError(null, LogConstants.ImproperEmailSending), times);
+            _loggerMock.Verify(l => l.LogError(null, LogConstants.IMPROPER_EMAIL_SENDING), times);
         }
 
         private void AssertLogErrorFailedToSend(Times times)
         {
-            _loggerMock.Verify(l => l.LogError(It.IsAny<Exception>(), LogConstants.FailedToSendEmail, It.IsAny<string>(), It.IsAny<string>()), times);
+            _loggerMock.Verify(l => l.LogError(It.IsAny<Exception>(), LogConstants.FAILED_TO_SEND_EMAIL, It.IsAny<string>(), It.IsAny<string>()), times);
         }
 
         private void AssertSmtpServiceCalls(Times times)

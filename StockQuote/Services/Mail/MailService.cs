@@ -26,7 +26,7 @@ namespace StockQuote.Services
         {
             if (messageType == MessageTypeEnum.None)
             {
-                _loggerService.LogError(null, LogConstants.ImproperEmailSending);
+                _loggerService.LogError(null, LogConstants.IMPROPER_EMAIL_SENDING);
 
                 _environmentService.TerminateProgramExecution();
             }
@@ -64,7 +64,7 @@ namespace StockQuote.Services
             }
             catch (Exception ex)
             {
-                _loggerService.LogError(ex, LogConstants.FailedToSendEmail, _config.SenderEmail, _config.RecipientEmail);
+                _loggerService.LogError(ex, LogConstants.FAILED_TO_SEND_EMAIL, _config.SenderEmail, _config.RecipientEmail);
 
                 _environmentService.TerminateProgramExecution();
             }

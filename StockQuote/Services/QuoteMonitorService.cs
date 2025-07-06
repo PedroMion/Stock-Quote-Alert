@@ -16,13 +16,13 @@ namespace StockQuote.Services
         {
             if (stockInformation.StockPrice >= parameters.SellPrice)
             {
-                _loggerService.LogInformation(LogConstants.ValueAboveThreshold, parameters.StockCode, parameters.SellPrice.ToString("N2"));
+                _loggerService.LogInformation(LogConstants.VALUE_ABOVE_THRESHOLD, parameters.StockCode, parameters.SellPrice.ToString("N2"));
 
                 return MessageTypeEnum.Sale;
             }
             else if (stockInformation.StockPrice <= parameters.BuyPrice)
             {
-                _loggerService.LogInformation(LogConstants.ValueBelowThreshold, parameters.StockCode, parameters.BuyPrice.ToString("N2"));
+                _loggerService.LogInformation(LogConstants.VALUE_BELOW_THRESHOLD, parameters.StockCode, parameters.BuyPrice.ToString("N2"));
 
                 return MessageTypeEnum.Purchase;
             }
@@ -32,29 +32,29 @@ namespace StockQuote.Services
 
         public async Task CheckStockQuoteAndSendEmailAsync(AlertParametersDto parameters)
         {
-            _loggerService.LogInformation(LogConstants.RetrievingAssetInformation, parameters.StockCode);
+            _loggerService.LogInformation(LogConstants.RETRIEVING_ASSET_INFORMATION, parameters.StockCode);
 
             StockInformationDto? stockInfo = await _stockApiService.GetStockInformationFromStockCodeAsync(parameters.StockCode);
 
             if (stockInfo != null)
             {
-                _loggerService.LogInformation(LogConstants.AssetInformationRetrieved, parameters.StockCode, stockInfo.StockPrice.ToString("N2"));
+                _loggerService.LogInformation(LogConstants.ASSET_INFORMATION_RETRIEVED, parameters.StockCode, stockInfo.StockPrice.ToString("N2"));
 
                 var typeOfEmail = VerifyStockQuote(parameters, stockInfo);
 
                 if (typeOfEmail != MessageTypeEnum.None)
                 {
-                    _loggerService.LogInformation(LogConstants.SendingEmail, parameters.StockCode);
+                    _loggerService.LogInformation(LogConstants.SENDING_EMAIL, parameters.StockCode);
 
                     await _mailService.SendEmailToRecipientFromTypeAndStockInformationAsync(typeOfEmail, stockInfo.StockPrice, parameters);
 
-                    _loggerService.LogInformation(LogConstants.EmailSent);
+                    _loggerService.LogInformation(LogConstants.EMAIL_SENT);
                 }
 
                 return;
             }
 
-            _loggerService.LogWarning(LogConstants.QuoteRequestFailed);
+            _loggerService.LogWarning(LogConstants.QUOTE_REQUEST_FAILED);
         }
     }
 }

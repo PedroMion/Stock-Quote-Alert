@@ -26,7 +26,7 @@ namespace StockQuote.Tests.Services
 
         private void AssertLogWarning(Times times)
         {
-            _loggerMock.Verify(l => l.LogWarning(LogConstants.QuoteRequestFailed), times);
+            _loggerMock.Verify(l => l.LogWarning(LogConstants.QUOTE_REQUEST_FAILED), times);
         }
 
         private void AssertMailMock(MessageTypeEnum messageType, decimal value, AlertParametersDto alertParametersDto, Times times)
