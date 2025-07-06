@@ -12,7 +12,7 @@ namespace StockQuote.Services
 
         public SmtpClient GetSmtpClientFromConfiguration()
         {
-            return new SmtpClient(_config.SmtpServer, _config.Port)
+            return new SmtpClient(_config.SmtpServer, _config.SmtpPort)
             {
                 Credentials = new NetworkCredential(_config.SenderEmail, _config.SenderPassword),
                 EnableSsl = true

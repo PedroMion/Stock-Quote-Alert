@@ -42,7 +42,7 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public void LogWarningConfigurationFalse_ShouldNotLogInformation()
+        public void LogWarningConfigurationFalseTest_ShouldNotLogInformation()
         {
             SetupUserConfiguration(logInformation: false);
 
@@ -52,7 +52,7 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public void LogWarningConfigurationTrue_ShouldLogInformation()
+        public void LogWarningConfigurationTrueTest_ShouldLogInformation()
         {
             SetupUserConfiguration(logInformation: true);
 

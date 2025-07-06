@@ -1,7 +1,0 @@
-{
-    "SmtpServer": "smtp.gmail.com",
-    "SmtpPort": 587,
-    "SenderEmail": "",
-    "SenderPassword": "",
-    "RecipientEmail": ""
-}

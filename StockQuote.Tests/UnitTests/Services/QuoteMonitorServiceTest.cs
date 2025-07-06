@@ -4,7 +4,7 @@ using StockQuote.Data.Dto;
 using StockQuote.Enums;
 using StockQuote.Services;
 using StockQuote.Services.Interfaces;
-using StockQuote.Tests.Helpers;
+using StockQuote.Tests.MockData;
 
 namespace StockQuote.Tests.Services
 {
@@ -13,17 +13,10 @@ namespace StockQuote.Tests.Services
         private readonly Mock<ILoggerService> _loggerMock = new();
         private readonly Mock<IMailService> _mailMock = new();
         private readonly Mock<IStockApiService> _apiMock = new();
-        private readonly AlertParametersDto _alertParameters = new()
-        {
-            StockCode = "PETR4",
-            BuyPrice = 22.00m,
-            SellPrice = 23.00m
-        };
-
-        private StockInformationDto GetApiResponseMockFromFileName(string fileName)
-        {
-            return TestHelper.GetMockObjectFromNameAndClass<StockInformationDto>("QuoteMonitorService", fileName);
-        }
+        private readonly AlertParametersDto _alertParameters = AlertParametersDtoMockData.alertParameters;
+        private readonly StockInformationDto _stockApiInRangeResponse = StockInformationDtoMockData.stockApiInRangeResponse;
+        private readonly StockInformationDto _stockApiBelowPurchaseThresholdResponse = StockInformationDtoMockData.stockApiBelowPurchaseThresholdResponse;
+        private readonly StockInformationDto _stockApiAboveSellThresholdResponse = StockInformationDtoMockData.stockApiAboveSellThresholdResponse;
 
         private void ConfigureStockApiResponse(StockInformationDto? apiResponseMock)
         {
@@ -58,8 +51,7 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task PriceInRangeTest_ShouldNotTriggerEmail()
         {
-            var apiResponseMock = GetApiResponseMockFromFileName("StockApiInRangeResponsePETR4.json");
-            ConfigureStockApiResponse(apiResponseMock);
+            ConfigureStockApiResponse(_stockApiInRangeResponse);
 
             await CallCheckStockQuoteAndSendEmailAsync();
 
@@ -70,25 +62,23 @@ namespace StockQuote.Tests.Services
         [Fact]
         public async Task PriceAboveSaleThresholdTest_ShouldTriggerSaleEmail()
         {
-            var apiResponseMock = GetApiResponseMockFromFileName("StockApiAboveSellThresholdResponsePETR4.json");
-            ConfigureStockApiResponse(apiResponseMock);
+            ConfigureStockApiResponse(_stockApiAboveSellThresholdResponse);
 
             await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Never());
-            AssertMailMock(MessageTypeEnum.Sale, apiResponseMock.StockPrice, _alertParameters, Times.Once());
+            AssertMailMock(MessageTypeEnum.Sale, _stockApiAboveSellThresholdResponse.StockPrice, _alertParameters, Times.Once());
         }
 
         [Fact]
         public async Task PriceBelowPurchaseThresholdTest_ShouldTriggerPurchaseEmail()
         {
-            var apiResponseMock = GetApiResponseMockFromFileName("StockApiBelowPurchaseThresholdResponsePETR4.json");
-            ConfigureStockApiResponse(apiResponseMock);
+            ConfigureStockApiResponse(_stockApiBelowPurchaseThresholdResponse);
 
             await CallCheckStockQuoteAndSendEmailAsync();
 
             AssertLogWarning(Times.Never());
-            AssertMailMock(MessageTypeEnum.Purchase, apiResponseMock.StockPrice, _alertParameters, Times.Once());
+            AssertMailMock(MessageTypeEnum.Purchase, _stockApiBelowPurchaseThresholdResponse.StockPrice, _alertParameters, Times.Once());
         }
 
         [Fact]

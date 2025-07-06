@@ -7,7 +7,7 @@ using StockQuote.Data.Dto;
 using StockQuote.Enums;
 using StockQuote.Services;
 using StockQuote.Services.Interfaces;
-using StockQuote.Tests.Helpers;
+using StockQuote.Tests.MockData;
 
 namespace StockQuote.Tests.Services
 {
@@ -17,18 +17,13 @@ namespace StockQuote.Tests.Services
         private readonly Mock<ILoggerService> _loggerMock = new();
         private readonly Mock<ISmtpClientService> _smtpMock = new();
         private readonly Mock<IEnvironmentService> _envMock = new();
-        private readonly AlertParametersDto _alertParameters = new()
-        {
-            StockCode = "PETR4",
-            BuyPrice = 22.00m,
-            SellPrice = 23.00m
-        };
+        private readonly AlertParametersDto _alertParameters = AlertParametersDtoMockData.alertParameters;
+        private readonly MailConfiguration _mailConfiguration = MailConfigurationMockData.mailConfiguration;
+        private readonly MailConfiguration _mailConfigurationWithoutEmailInformation = MailConfigurationMockData.mailConfigurationWithouEmailInformation;
 
-        private void SetupMailConfigurationAndEnvironment(string mailConfigurationFileName)
+        private void SetupMailConfigurationAndEnvironment(MailConfiguration configurationObject)
         {
-            MailConfiguration mailConfigurationMock = TestHelper.GetMockObjectFromNameAndClass<MailConfiguration>("MailService", mailConfigurationFileName);
-
-            _optionsMock.Setup(options => options.Value).Returns(mailConfigurationMock);
+            _optionsMock.Setup(options => options.Value).Returns(configurationObject);
 
             _envMock.Setup(env => env.TerminateProgramExecution())
                     .Throws(new OperationCanceledException());
@@ -91,9 +86,9 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public async Task MessageTypeSale_ShouldTriggerEmail()
+        public async Task MessageTypeSaleTest_ShouldTriggerEmail()
         {
-            SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
+            SetupMailConfigurationAndEnvironment(_mailConfiguration);
 
             await CallSendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Sale, Convert.ToDecimal(23.10));
 
@@ -103,9 +98,9 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public async Task MessageTypePurchase_ShouldTriggerEmail()
+        public async Task MessageTypePurchaseTest_ShouldTriggerEmail()
         {
-            SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
+            SetupMailConfigurationAndEnvironment(_mailConfiguration);
 
             await CallSendEmailToRecipientFromTypeAndStockInformationAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10));
 
@@ -115,9 +110,9 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public async Task MessageTypeNone_ShouldLogError()
+        public async Task MessageTypeNoneTest_ShouldLogError()
         {
-            SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
+            SetupMailConfigurationAndEnvironment(_mailConfiguration);
 
             await SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum.None, Convert.ToDecimal(23.10));
 
@@ -127,9 +122,9 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public async Task InvalidEmailInformation_ShouldTriggerError()
+        public async Task InvalidEmailInformationTest_ShouldTriggerError()
         {
-            SetupMailConfigurationAndEnvironment("MailConfigurationWithouEmailInformationMock.json");
+            SetupMailConfigurationAndEnvironment(_mailConfigurationWithoutEmailInformation);
 
             await SendEmailTestWithErrorAndAssertExceptionAsync(MessageTypeEnum.Purchase, Convert.ToDecimal(23.10));
 
@@ -139,9 +134,9 @@ namespace StockQuote.Tests.Services
         }
 
         [Fact]
-        public async Task WhenSmtpFails_ShouldTriggerError()
+        public async Task WhenSmtpFailsTest_ShouldTriggerError()
         {
-            SetupMailConfigurationAndEnvironment("MailConfigurationMock.json");
+            SetupMailConfigurationAndEnvironment(_mailConfiguration);
 
             SetupSmtpThrowException();
 

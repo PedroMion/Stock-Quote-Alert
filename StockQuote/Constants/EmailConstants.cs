@@ -16,6 +16,10 @@ namespace StockQuote.Constants
 
         public const string PURCHASE_SUBJECT = "[StockQuote] Alerta de compra - {STOCK_CODE}";
 
+        public const string EMAIL_MESSAGE_PURCHASE = "abaixo do valor de compra";
+
+        public const string EMAIL_MESSAGE_SALE = "acima do valor de venda";
+
         public const string BODY = """
         <!DOCTYPE html>
         <html lang="pt-BR">

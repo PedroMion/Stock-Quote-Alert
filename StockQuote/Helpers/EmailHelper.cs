@@ -7,10 +7,10 @@ namespace StockQuote.Helpers
 {
     public class EmailHelper
     {
-        private static string GetSpecificMailMessage(MessageTypeEnum emailType)
+        private static string GetSpecificEmailMessage(MessageTypeEnum emailType)
         {
-            if (emailType == MessageTypeEnum.Purchase) return "abaixo do valor de compra";
-            else return "acima do valor de venda";
+            if (emailType == MessageTypeEnum.Purchase) return EmailConstants.EMAIL_MESSAGE_PURCHASE;
+            else return EmailConstants.EMAIL_MESSAGE_SALE;
         }
 
         private static string GetThresholdValueFromParametersBasedOnType(MessageTypeEnum type, AlertParametersDto parameters)
@@ -21,7 +21,7 @@ namespace StockQuote.Helpers
             }
             else
             {
-                return parameters.SellPrice.ToString("N2");   
+                return parameters.SellPrice.ToString("N2");
             }
         }
 
@@ -35,7 +35,7 @@ namespace StockQuote.Helpers
         {
             return EmailConstants.BODY.Replace(EmailConstants.STOCK_CODE_PLACEHOLDER, parameters.StockCode)
                 .Replace(EmailConstants.DATE_TIME_PLACEHOLDER, DateTime.Now.ToString(new CultureInfo("pt-BR")))
-                .Replace(EmailConstants.EMAIL_TYPE_PLACEHOLDER, GetSpecificMailMessage(emailType))
+                .Replace(EmailConstants.EMAIL_TYPE_PLACEHOLDER, GetSpecificEmailMessage(emailType))
                 .Replace(EmailConstants.THRESHOLD_VALUE_PLACEHOLDER, GetThresholdValueFromParametersBasedOnType(emailType, parameters))
                 .Replace(EmailConstants.STOCK_VALUE_PLACEHOLDER, stockValue.ToString("N2"));
         }

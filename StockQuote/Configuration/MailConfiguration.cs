@@ -4,7 +4,7 @@ namespace StockQuote.Configuration
     {
         public required string SmtpServer { get; set; }
 
-        public int Port { get; set; }
+        public int SmtpPort { get; set; }
 
         public required string SenderEmail { get; set; }
 
