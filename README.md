@@ -33,7 +33,7 @@ Para que a aplicação funcione corretamente, é necessário preencher alguns da
 Você pode preencher essa lista com os ativos a serem monitorados caso não deseje passar os atributos via linha de comando ou deseje monitorar mais de um ativo simultaneamente. Cada objeto deve seguir o formato abaixo:
 
 ```json
-{ "StockCode": "CódigoDoAtivo", "SellPrice": LimiteParaVenda "BuyPrice": LimiteParaCompra }
+{ "StockCode": "CódigoDoAtivo", "SellPrice": LimiteParaVenda, "BuyPrice": LimiteParaCompra }
 ```
 
 Exemplo:
@@ -56,7 +56,7 @@ dotnet publish
 Após o publish, vá até a pasta de saída:
 
 ```bash
-cd "./bin/Release/net9.0/publish"
+cd "./StockQuote/bin/Release/net9.0/publish"
 ```
 
 ## ✅ Execução com parâmetros via console
