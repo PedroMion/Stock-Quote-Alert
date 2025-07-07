@@ -7,6 +7,7 @@ namespace StockQuote.Tests.Helpers
     public class InitializationHelperTest
     {
         private readonly AlertParametersDto _alertParameters = AlertParametersDtoMockData.alertParameters;
+        private readonly List<AlertParametersDto> _alertparametersJson = AlertParametersDtoMockData.alertParametersJson;
         private readonly string[] _args = ["PETR4", "23.00", "22.00"];
 
         private List<AlertParametersDto>? GetParametersFromInitializationHelper(string[] args, List<AlertParametersDto>? jsonParameters)
@@ -28,11 +29,35 @@ namespace StockQuote.Tests.Helpers
         }
 
         [Fact]
-        public void GetAlertParametersListWhenOnlyJsonIsProvided_ShouldReturnArgs()
+        public void GetAlertParametersListWhenOnlyJsonIsProvided_ShouldReturnJson()
         {
-            var response = GetParametersFromInitializationHelper([], [_alertParameters]);
+            var response = GetParametersFromInitializationHelper([], _alertparametersJson);
+
+            AssertResponseIsExpected(expected: _alertparametersJson, actual: response);
+        }
+
+        [Fact]
+        public void GetAlertParametersListWhenBothAreProvided_ShouldReturnArgs()
+        {
+            var response = GetParametersFromInitializationHelper(_args, _alertparametersJson);
 
             AssertResponseIsExpected(expected: [_alertParameters], actual: response);
+        }
+
+        [Fact]
+        public void GetAlertParametersListWhithWrongArguments_ShouldReturnNull()
+        {
+            var response = GetParametersFromInitializationHelper(["abc", "abc", "abc"], _alertparametersJson);
+
+            AssertResponseIsExpected(expected: null, actual: response);
+        }
+
+        [Fact]
+        public void GetAlertParametersListWithoutBothParameters_ShouldReturnNull()
+        {
+            var response = GetParametersFromInitializationHelper([], null);
+
+            AssertResponseIsExpected(expected: null, actual: response);
         }
     }
 }
