@@ -1,8 +1,6 @@
 using System.Globalization;
 using StockQuote.Constants;
 using StockQuote.Data.Dto;
-using StockQuote.Services;
-using StockQuote.Services.Interfaces;
 
 namespace StockQuote.Helpers
 {
@@ -13,7 +11,8 @@ namespace StockQuote.Helpers
             string symbol = consoleArgs[0];
 
             if (!decimal.TryParse(consoleArgs[1], CultureInfo.InvariantCulture, out var sellPrice) ||
-                !decimal.TryParse(consoleArgs[2], CultureInfo.InvariantCulture, out var buyPrice))
+                !decimal.TryParse(consoleArgs[2], CultureInfo.InvariantCulture, out var buyPrice) ||
+                sellPrice <= buyPrice)
             {
                 return null;
             }

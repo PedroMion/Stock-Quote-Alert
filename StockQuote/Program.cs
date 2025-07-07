@@ -9,7 +9,6 @@ using StockQuote.Services.Interfaces;
 
 namespace StockQuote
 {
-
     public class Program
     {
         public static void Main(string[] args)

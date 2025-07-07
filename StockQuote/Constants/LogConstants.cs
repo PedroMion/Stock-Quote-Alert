@@ -28,14 +28,14 @@ namespace StockQuote.Constants
 
         public const string ASSET_MONITORING_COMPLETED = "Verificação completa para ativo: {Asset}. Aguardando próxima rodada.";
 
-        public const string BAD_PARAMETERS_ERROR = "Os valores monetários fornecidos devem ser números decimais válidos, com ponto como separador.";
+        public const string BAD_PARAMETERS_ERROR = "Os valores monetários fornecidos devem ser números decimais válidos, com ponto como separador, e o valor de venda deve ser maior do que o valor de compra.";
 
         public const string HOW_TO_USE_PROGRAM_ERROR = """
                 Padrão de uso esperado: ./StockQuote <ATIVO> <PRECO_VENDA> <PRECO_COMPRA>
                 Ex.: ./StockQuote PETR4 22.67 22.59
                 Caso esse padrão não seja observado, o programa tentará extrair os ativos a serem monitorados das configurações de usuário.
-                Ex.: "AtivosMonitorados": [
-                        { "CódigoAtivo": "PETR4.SA", "PreçoCompra": 22.67, "PreçoVenda": 22.59 }
+                Ex.: "MonitoredAssets": [
+                        { "StockCode": "PETR4.SA", "BuyPrice": 22.67, "SellPrice": 22.59 }
                      ]
                 Por favor, forneça as informações de uma das formas válidas.
         """;
