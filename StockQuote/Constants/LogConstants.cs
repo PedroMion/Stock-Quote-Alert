@@ -24,7 +24,7 @@ namespace StockQuote.Constants
 
         public const string WAITING_FOR_NEXT_ROUND = "Verificação concluída para todos os ativos! Próxima rodada em {delayBetweenChecks} segundos.";
 
-        public const string ASSET_MONITORING_ERROR = "Erro ao monitorar ativo: {Asset}. Por favor, entre em contato com o responsável pelo software.";
+        public const string ASSET_MONITORING_ERROR = "Erro ao monitorar ativo: {Asset}. Por favor, verifique os parâmetros fornecidos. Caso o erro persista, entre em contato com o responsável pelo software.";
 
         public const string ASSET_MONITORING_COMPLETED = "Verificação completa para ativo: {Asset}. Aguardando próxima rodada.";
 
@@ -35,7 +35,7 @@ namespace StockQuote.Constants
                 Ex.: ./StockQuote PETR4 22.67 22.59
                 Caso esse padrão não seja observado, o programa tentará extrair os ativos a serem monitorados das configurações de usuário.
                 Ex.: "MonitoredAssets": [
-                        { "StockCode": "PETR4.SA", "BuyPrice": 22.67, "SellPrice": 22.59 }
+                        { "StockCode": "PETR4.SA", "SellPrice": 22.59, "BuyPrice": 22.67 }
                      ]
                 Por favor, forneça as informações de uma das formas válidas.
         """;

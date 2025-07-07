@@ -4,8 +4,8 @@ namespace StockQuote.Data.Dto
     {
         public required string StockCode { get; init; }
 
-        public required decimal BuyPrice { get; init; }
-
         public required decimal SellPrice { get; init; }
+
+        public required decimal BuyPrice { get; init; }
     }
 }
